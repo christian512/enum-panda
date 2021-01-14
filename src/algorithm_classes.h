@@ -33,6 +33,13 @@ namespace panda
       /// Precondition: if input are facets, then these facets must be normalized.
       template <typename Integer, typename TagType>
       Matrix<Integer> classes(std::set<Row<Integer>>, const Maps&, TagType);
+      /// Transforms a list of rows under affine transformation
+      /// Precondition: None?
+      template <typename Integer>
+      std::set<std::vector<double>> affineTransformation(const std::set<Row<Integer>>&);
+      /// Checks if two given vertices are equivalent
+      /// Precondition: first input is list of shifted rows, second is the one to check for equivalence
+      int checkEquivalence(std::set<std::vector<double>>, std::vector<double>);
    }
 }
 
