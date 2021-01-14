@@ -183,6 +183,7 @@ template <>
 std::tuple<Inequalities<int>, Names, Maps, Vertices<int>> panda::input::inequalities<int>(int argc, char** argv)
 {
    // TODO: In this function I have to implement the reading of deterministic points
+   std::cerr << 'Reading file with inequalities \n';
    const auto filename = getFilename(argc, argv);
    std::ifstream file(filename.c_str());
    if ( !file )
@@ -194,6 +195,8 @@ std::tuple<Inequalities<int>, Names, Maps, Vertices<int>> panda::input::inequali
    std::size_t dimension = std::numeric_limits<std::size_t>::max();
    Names names;
    Maps maps;
+   // Deterministic behaviors from file
+   Deterministics<int> deterministics;
    if ( !implementation::containsKeywords(file) )
    {
       throw std::invalid_argument("An outer description must be given in PANDA format.");

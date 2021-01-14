@@ -35,5 +35,8 @@ namespace panda
    /// Synonym for matrix: Vertices.
    template <typename Integer>
    using Vertices = Matrix<Integer>;
+   /// Synonym for matrix: Deterministics
+   template <typename Integer>
+   using Deterministics = Matrix<Integer>;
 }
 
