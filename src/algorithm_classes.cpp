@@ -70,36 +70,32 @@ Matrix<Integer> panda::algorithm::classes(std::set<Row<Integer>> rows, const Map
 {
    Matrix<Integer> classes;
    // shift the rows
-   std::cerr << "shifting rows \n";
    auto rows_shifted = affineTransformation(rows);
-   std::cerr << "shifting rows done! \n";
+   std::cerr << "shifted the row";
    // while the rows are not empty
    while ( !rows.empty() )
    {
       const auto row_class = getClass(*rows.begin(), maps, tag);
-      std::cerr << "got class for this row \n";
       // get the shifted version of the row classes
       const auto row_shifted_class = affineTransformation(row_class);
-      std::cerr << "shifted the row class set \n";
+      std::cerr << "shifted the class rows";
       assert( !row_class.empty() );
       assert( !row_shifted_class.empty() );
+      assert ( row_shifted_class.size() == row_class.size() );
       classes.push_back(*row_class.crbegin()); // Important detail: last element is chosen as the representative
       // Iterate over the class rows (and shifted ones just by index)
-      for ( auto& row_shifted : row_shifted_class )
+      for ( auto row_shifted : row_shifted_class )
       {
-         // set idx -> just lazy could also change the for loop
-         const auto iterator = row_shifted_class.find(row_shifted);
-         // TODO: The above statement needs to be replaced by a function that checks equivalence by our definition
-         // auto position = checkEquivalence(rows_shifted, row_shifted);
-         if ( iterator != row_shifted_class.end() )
+         // check the equivalence between of the shifted row, with the others
+         int position = checkEquivalence(rows_shifted, row_shifted);
+         if ( position != -1)
          {
-            int idx = std::distance(row_shifted_class.begin(), iterator);
             // remove the entries from rows and rows shifted
             auto its = rows_shifted.begin();
-            std::advance(its, idx);
+            std::advance(its, position);
             rows_shifted.erase(its);
             auto it = rows.begin();
-            std::advance(it, idx);
+            std::advance(it, position);
             rows.erase(it);
          }
       }
@@ -120,18 +116,26 @@ std::set<std::vector<double>> panda::algorithm::affineTransformation(const std::
       double b[2];
       std::partial_sort_copy(doubleVec.begin(), doubleVec.end(), b, b + 2);
       // transform the double vector
-      for (auto val : doubleVec)
+      for (int i = 0; i < doubleVec.size(); i++)
       {
-         val = (val - b[0]) / b[1];
+         double val = (doubleVec[i] - b[0]) / b[1];
+         // round the vector
+         val = round( val * 1000.0 ) / 1000.0;
+         doubleVec[i] = val;
       }
       transformed.insert(transformed.end(), doubleVec);
    }
    return transformed;
 }
-template <typename Integer>
-int checkEquivalence(std::set<std::vector<double>> rows_shifted, std::vector<double> row_shifted)
+
+int panda::algorithm::checkEquivalence(std::set<std::vector<double>> rows_shifted, std::vector<double> row_shifted)
 {
-   // perform affine transformation on the single vectors
-   return 1;
-   //
+   // find the row_shifted in the list of all shifted rows
+   const auto iterator = rows_shifted.find(row_shifted);
+   int position = -1;
+   if ( iterator != rows_shifted.end())
+   {
+      position = std::distance(rows_shifted.begin(), iterator);
+   }
+   return position;
 }
