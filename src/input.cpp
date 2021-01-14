@@ -109,6 +109,53 @@ namespace
       expandInequalities(inequalities, tmp_maps);
       return inequalities;
    }
+   Deterministics<int> readDeterministics(std::istream& stream)
+   {
+      // TODO: Should the argument be istream of ifstream?
+      // Red the deterministic behaviors from the file
+      Deterministics<int> deterministics;
+      std::string token;
+      // check that current line is deterministics token
+      if ( !std::getline(stream, token))
+      {
+         throw std::invalid_argument("Cannot read deterministic points");
+      }
+      token = panda::input::trimWhitespace(token);
+      if ( !panda::input::implementation::isKeywordDeterministics(token))
+      {
+         throw std::invalid_argument("Cannot read deterministic points");
+      }
+      // Continue until the stream is empty or there is a next keyword
+      std::string nextLine;
+      nextLine = panda::input::trimWhitespace(panda::peekLine(stream));
+      while ( stream && !panda::input::implementation::isKeyword(nextLine))
+      {
+         // if line is empty go to next one
+         if ( nextLine.empty() )
+         {
+            std::getline(stream, token);
+            nextLine = panda::input::trimWhitespace(panda::peekLine(stream));
+            continue;
+         }
+         // We assume that the deterministic points are binary
+         panda::input::skipWhitespace(stream);
+         Row<int> det;
+         // iterate through stream until next line break
+         for ( int tmp; stream >> tmp; )
+         {
+            // push entry to the deterministic row
+            det.push_back(tmp);
+            panda::input::skipWhitespace(stream);
+            if ( stream.peek() == '\n' )
+            {
+               break;
+            }
+         }
+         // append the det-behavior to the full list
+         deterministics.insert(deterministics.end(), det);
+      }
+      return deterministics;
+   }
 }
 
 template <>
@@ -226,6 +273,11 @@ std::tuple<Inequalities<int>, Names, Maps, Vertices<int>> panda::input::inequali
       else if ( implementation::isKeywordReducedInequalities(token) )
       {
          inequalities = readReducedInequalities(argc, argv, file, names, maps, equations);
+      }
+      else if ( implementation::isKeywordDeterministics(token) )
+      {
+         std::cerr << 'Reading deterministic behaviors';
+         // TODO: write a function: readDeterministics
       }
       else
       {

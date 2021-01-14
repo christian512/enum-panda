@@ -188,9 +188,9 @@ bool panda::input::implementation::isKeywordNames(const std::string& string) noe
            string == "Names:");
 }
 
-bool panda::input::implementation::isKeywordDeterministics(const std::string& string) noexcept
-{
+bool panda::input::implementation::isKeywordDeterministics(const std::string& string) noexcept {
    return (string == "DETERMINISTICS" ||
            string == "DETERMINISTICS:" ||
            string == "Deterministics" ||
            string == "Deterministics:");
+}
