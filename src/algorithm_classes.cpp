@@ -70,14 +70,17 @@ Matrix<Integer> panda::algorithm::classes(std::set<Row<Integer>> rows, const Map
 {
    Matrix<Integer> classes;
    // shift the rows
+   std::cerr << "shifting rows \n";
    auto rows_shifted = affineTransformation(rows);
-   std::cout << "Shifted all rows";
+   std::cerr << "shifting rows done! \n";
    // while the rows are not empty
    while ( !rows.empty() )
    {
       const auto row_class = getClass(*rows.begin(), maps, tag);
+      std::cerr << "got class for this row \n";
       // get the shifted version of the row classes
       const auto row_shifted_class = affineTransformation(row_class);
+      std::cerr << "shifted the row class set \n";
       assert( !row_class.empty() );
       assert( !row_shifted_class.empty() );
       classes.push_back(*row_class.crbegin()); // Important detail: last element is chosen as the representative
@@ -109,28 +112,18 @@ std::set<std::vector<double>> panda::algorithm::affineTransformation(const std::
 {
    // define transformed lists
    std::set<std::vector<double>> transformed;
-   for ( auto& row: input )
+   for ( auto row: input)
    {
-      // create a double vector
-      std::vector<double> doubleVec;
-      transform(row.begin(), row.end(), doubleVec.begin(), [](int x) { return (double)x;});
-      // find the minimum value of the row and add it to all elements
-      auto& min_value = *std::min_element(row.begin(), row.end());
-      transform(doubleVec.begin(), doubleVec.end(), doubleVec.begin(), bind2nd(std::plus<double>(), min_value));
-      // find the second smallest value using partial sort
+      // create a double vector from the row
+      std::vector<double> doubleVec(row.begin(), row.end());
+      // find the two smallest values
       double b[2];
-      std::partial_sort_copy(doubleVec.begin(), doubleVec.end(),b, b + 2);
-      const auto& sec_min_value = b[1];
-      // check that lowest value is zero
-      assert ( b[0] == 0);
-      // create a double vector
+      std::partial_sort_copy(doubleVec.begin(), doubleVec.end(), b, b + 2);
       // transform the double vector
-      // TODO: This is not yet correct, we also need the deterministic points or at least the sum of those
-      for (auto& val : doubleVec)
+      for (auto val : doubleVec)
       {
-         val = (val - (double) min_value) / (double)sec_min_value;
+         val = (val - b[0]) / b[1];
       }
-      // add the double vector to the transformed matrix
       transformed.insert(transformed.end(), doubleVec);
    }
    return transformed;
