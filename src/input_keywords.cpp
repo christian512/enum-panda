@@ -43,7 +43,8 @@ bool panda::input::implementation::isKeyword(const std::string& string) noexcept
            isKeywordReducedInequalities(string) ||
            isKeywordMaps(string) ||
            isKeywordNames(string) ||
-           isKeywordEnd(string) );
+           isKeywordEnd(string) ||
+           isKeywordDeterministics(string));
 }
 
 bool panda::input::implementation::isKeywordEnd(const std::string& string) noexcept
@@ -187,3 +188,9 @@ bool panda::input::implementation::isKeywordNames(const std::string& string) noe
            string == "Names:");
 }
 
+bool panda::input::implementation::isKeywordDeterministics(const std::string& string) noexcept
+{
+   return (string == "DETERMINISTICS" ||
+           string == "DETERMINISTICS:" ||
+           string == "Deterministics" ||
+           string == "Deterministics:");
