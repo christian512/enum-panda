@@ -96,10 +96,12 @@ namespace
    try
    {
       assert( argc > 0 && argv != nullptr );
+      // TODO: Here we have to read the deterministic points
       auto data = input::inequalities<Integer>(argc, argv);
       const auto& mpi_session = mpi::getSession();
       if ( mpi_session.isMaster() )
       {
+         // TODO: Here we have to process the deterministic points
          implementation::adjacencyDecomposition<JobManager>(argc, argv, data, tag::vertex{});
       }
       else

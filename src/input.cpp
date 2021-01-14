@@ -182,6 +182,7 @@ std::tuple<Vertices<int>, Names, Maps, Inequalities<int>> panda::input::vertices
 template <>
 std::tuple<Inequalities<int>, Names, Maps, Vertices<int>> panda::input::inequalities<int>(int argc, char** argv)
 {
+   // TODO: In this function I have to implement the reading of deterministic points
    const auto filename = getFilename(argc, argv);
    std::ifstream file(filename.c_str());
    if ( !file )

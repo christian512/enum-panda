@@ -56,6 +56,7 @@ void panda::implementation::adjacencyDecomposition(int argc, char** argv, const 
    const auto& names = std::get<1>(data);
    const auto& known_output = std::get<3>(data);
    JobManagerType<Integer, TagType> job_manager(names, node_count, thread_count);
+   // TODO: Here we also need to process the Deterministics
    const auto reduced_data = reduce(job_manager, data);
    const auto& equations = std::get<0>(reduced_data);
    const auto& maps = std::get<1>(reduced_data);
