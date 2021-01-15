@@ -51,6 +51,27 @@ Matrix<Integer> panda::algorithm::rotation(const Matrix<Integer>& matrix,
    return classes(output, maps, tag);
 }
 
+template <typename Integer, typename TagType>
+Matrix<Integer> panda::algorithm::rotationDeterministic(const Matrix<Integer>& matrix,
+                                           const Row<Integer>& input,
+                                           const Maps& maps,
+                                           const Matrix<Integer>& deterministics,
+                                           TagType tag)
+{
+   // as the first step of the rotation, the furthest Vertex w.r.t. the input facet is calculated.
+   // this will be the same vertex for all neighbouring ridges, hence, only needs to be computed once.
+   const auto furthest_vertex = furthestVertex(matrix, input);
+   const auto ridges = getRidges(matrix, input);
+   std::set<Row<Integer>> output;
+   for ( const auto& ridge : ridges )
+   {
+      const auto new_row = rotate(matrix, furthest_vertex, input, ridge);
+      output.insert(new_row);
+   }
+   // TODO: Here we have to calculate classes including the deterministics
+   return classes(output, maps, tag);
+}
+
 namespace
 {
    template <typename Integer>

@@ -18,6 +18,9 @@ namespace panda
    {
       EXTERN template Matrix<Integer> rotation(const Matrix<Integer>&, const Row<Integer>&, const Maps&, tag::facet);
       EXTERN template Matrix<Integer> rotation(const Matrix<Integer>&, const Row<Integer>&, const Maps&, tag::vertex);
+      // Functions for deterministic rotation
+      EXTERN template Matrix<Integer> rotationDeterministic(const Matrix<Integer>&, const Row<Integer>&, const Maps&, const Matrix<Integer>&, tag::facet);
+      EXTERN template Matrix<Integer> rotationDeterministic(const Matrix<Integer>&, const Row<Integer>&, const Maps&, const Matrix<Integer>&, tag::vertex);
    }
 }
 

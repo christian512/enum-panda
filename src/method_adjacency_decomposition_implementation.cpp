@@ -118,7 +118,7 @@ void panda::implementation::adjacencyDecompositionDeterministic(int argc, char**
                                      break;
                                   }
                                   // TODO: Here we have to pass the deterministics and generate a new algorithm rotationDeterministics
-                                  const auto jobs = algorithm::rotation(input, job, maps, tag);
+                                  const auto jobs = algorithm::rotationDeterministic(input, job, maps, deterministics, tag);
                                   job_manager.put(jobs);
                                }
                             });
