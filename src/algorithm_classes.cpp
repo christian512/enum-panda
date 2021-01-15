@@ -18,6 +18,7 @@
 
 #include "algorithm_map_operations.h"
 #include "algorithm_row_operations.h"
+#include "algorithm_matrix_operations.h"
 
 using namespace panda;
 
@@ -101,38 +102,40 @@ Matrix<Integer> panda::algorithm::classesDeterministic(std::set<Row<Integer>> ro
    {
       return classes(rows, maps, tag);
    }
-   std::cerr << "running deterministic version of classes algorithm";
-//   Matrix<Integer> classes;
-//   // shift the rows
-//   auto rows_shifted = affineTransformation(rows);
-//   // while the rows are not empty
-//   while ( !rows.empty() )
-//   {
-//      const auto row_class = getClass(*rows.begin(), maps, tag);
-//      // get the shifted version of the row classes
-//      const auto row_shifted_class = affineTransformation(row_class);
-//      assert( !row_class.empty() );
-//      assert( !row_shifted_class.empty() );
-//      assert ( row_shifted_class.size() == row_class.size() );
-//      classes.push_back(*row_class.crbegin()); // Important detail: last element is chosen as the representative
-//      // Iterate over the class rows (and shifted ones just by index)
-//      for ( auto row_shifted : row_shifted_class )
-//      {
-//         // check the equivalence between of the shifted row, with the others
-//         int position = checkEquivalence(rows_shifted, row_shifted);
-//         if ( position != -1)
-//         {
-//            // remove the entries from rows and rows shifted
-//            auto its = rows_shifted.begin();
-//            std::advance(its, position);
-//            rows_shifted.erase(its);
-//            auto it = rows.begin();
-//            std::advance(it, position);
-//            rows.erase(it);
-//         }
-//      }
-//   }
-   return classes(rows, maps, tag);
+   std::cerr << "running deterministic version of classes algorithm \n";
+   std::cerr << "Number of deterministics: " << dets.size() << "\n";
+
+   // class representatives to return
+   Matrix<Integer> classes_repr;
+   while ( !rows.empty() )
+   {
+      std::cerr << "rows.size(): " << rows.size() << "\n";
+      // Get the class of the first row
+      const auto rows_class = getClass(*rows.begin(), maps, tag);
+      assert ( !rows_class.empty() );
+      assert ( panda::algorithm::checkEquivalence(*rows_class.begin(), *rows.begin(), dets));
+      // add the representative of the class to the return matrix
+      classes_repr.push_back(*rows_class.crbegin());
+      // iterate over the rows of that class
+      for ( auto row_class : rows_class )
+      {
+         // generate a copy of rows (needed to run proper for-loop)
+         std::set<Row<Integer>> copy_rows (rows);
+         // check if any row in rows is equivalent to rows_class
+         for ( const auto& row : copy_rows)
+         {
+            // Test if both rows are equivalent
+            if ( panda::algorithm::checkEquivalence(row_class, row, dets) )
+            {
+               // if equiv -> delete that row
+               const auto position = rows.find(row);
+               rows.erase(position);
+            }
+
+         }
+      }
+   }
+   return classes_repr;
 }
 
 template <typename  Integer>
@@ -160,14 +163,31 @@ std::set<std::vector<double>> panda::algorithm::affineTransformation(const std::
    return transformed;
 }
 
-int panda::algorithm::checkEquivalence(std::set<std::vector<double>> rows_shifted, std::vector<double> row_shifted)
+template <typename  Integer>
+bool panda::algorithm::checkEquivalence(const Row<Integer>& row_one, const Row<Integer>& row_two, const Deterministics<Integer>& dets)
 {
-   // find the row_shifted in the list of all shifted rows
-   const auto iterator = rows_shifted.find(row_shifted);
-   int position = -1;
-   if ( iterator != rows_shifted.end())
+   assert ( row_one.size() == row_two.size() );
+   // multiply the vectors by the deterministics
+   Row<Integer> v_one = dets * row_one;
+   Row<Integer> v_two = dets * row_two;
+   //row_two = dets * row_two;
+   // Generate double vectors from the integer input vectors
+   std::vector<double> d_one(v_one.begin(), v_one.end());
+   std::vector<double> d_two(v_two.begin(), v_two.end());
+   // find the two lowest values in each vector
+   double low_v_one[2];
+   double low_v_two[2];
+   std::partial_sort_copy(d_one.begin(), d_one.end(), low_v_one, low_v_one + 2);
+   std::partial_sort_copy(d_two.begin(), d_two.end(), low_v_two, low_v_two + 2);
+   // rescale the two vectors
+   for ( int i = 0; i < d_one.size(); i++)
    {
-      position = std::distance(rows_shifted.begin(), iterator);
+      d_one[i] = ( d_one[i] - low_v_one[0] ) / low_v_one[1];
+      d_two[i] = ( d_two[i] - low_v_two[0] ) / low_v_two[1];
+      // round the values
+      d_one[i] = round(d_one[i] * 1000) / 1000;
+      d_two[i] = round(d_two[i] * 1000) / 1000;
    }
-   return position;
+   // check if the two vectors are equal
+   return d_one == d_two;
 }

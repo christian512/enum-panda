@@ -47,7 +47,8 @@ namespace panda
       std::set<std::vector<double>> affineTransformation(const std::set<Row<Integer>>&);
       /// Checks if two given vertices are equivalent
       /// Precondition: first input is list of shifted rows, second is the one to check for equivalence
-      int checkEquivalence(std::set<std::vector<double>>, std::vector<double>);
+      template <typename  Integer>
+      bool checkEquivalence(const Row<Integer>&, const Row<Integer>&, const Deterministics<Integer>&);
    }
 }
 
