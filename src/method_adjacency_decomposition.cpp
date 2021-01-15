@@ -102,11 +102,11 @@ namespace
       if ( mpi_session.isMaster() )
       {
          // TODO: Here we have to process the deterministic points
-         implementation::adjacencyDecomposition<JobManager>(argc, argv, data, tag::vertex{});
+         implementation::adjacencyDecompositionDeterministic<JobManager>(argc, argv, data, tag::vertex{});
       }
       else
       {
-         implementation::adjacencyDecomposition<JobManagerProxy>(argc, argv, data, tag::vertex{});
+         implementation::adjacencyDecompositionDeterministic<JobManagerProxy>(argc, argv, data, tag::vertex{});
       }
       return 0;
    }

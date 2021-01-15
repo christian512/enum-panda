@@ -227,7 +227,7 @@ std::tuple<Vertices<int>, Names, Maps, Inequalities<int>> panda::input::vertices
 }
 
 template <>
-std::tuple<Inequalities<int>, Names, Maps, Vertices<int>> panda::input::inequalities<int>(int argc, char** argv)
+std::tuple<Inequalities<int>, Names, Maps, Vertices<int>, Deterministics<int>> panda::input::inequalities<int>(int argc, char** argv)
 {
    // TODO: In this function I have to implement the reading of deterministic points
    std::cerr << 'Reading file with inequalities \n';
@@ -299,7 +299,7 @@ std::tuple<Inequalities<int>, Names, Maps, Vertices<int>> panda::input::inequali
    {
       input::implementation::checkValidityOfVertices(inequalities, known_vertices);
    }
-   return std::make_tuple(inequalities, names, maps, known_vertices);
+   return std::make_tuple(inequalities, names, maps, known_vertices, deterministics);
 }
 
 namespace

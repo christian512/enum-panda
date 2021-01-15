@@ -20,6 +20,12 @@ namespace panda
       EXTERN template void adjacencyDecomposition<JobManager>(int, char**, const std::tuple<Matrix<Integer>, Names, Maps, Matrix<Integer>>&, tag::vertex);
       EXTERN template void adjacencyDecomposition<JobManagerProxy>(int, char**, const std::tuple<Matrix<Integer>, Names, Maps, Matrix<Integer>>&, tag::facet);
       EXTERN template void adjacencyDecomposition<JobManagerProxy>(int, char**, const std::tuple<Matrix<Integer>, Names, Maps, Matrix<Integer>>&, tag::vertex);
+      // function for Deterministic points
+      EXTERN template void adjacencyDecompositionDeterministic<JobManager>(int, char**, const std::tuple<Matrix<Integer>, Names, Maps, Matrix<Integer>, Matrix<Integer>>&, tag::facet);
+      EXTERN template void adjacencyDecompositionDeterministic<JobManager>(int, char**, const std::tuple<Matrix<Integer>, Names, Maps, Matrix<Integer>, Matrix<Integer>>&, tag::vertex);
+      EXTERN template void adjacencyDecompositionDeterministic<JobManagerProxy>(int, char**, const std::tuple<Matrix<Integer>, Names, Maps, Matrix<Integer>, Matrix<Integer>>&, tag::facet);
+      EXTERN template void adjacencyDecompositionDeterministic<JobManagerProxy>(int, char**, const std::tuple<Matrix<Integer>, Names, Maps, Matrix<Integer>, Matrix<Integer>>&, tag::vertex);
+
    }
 }
 

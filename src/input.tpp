@@ -17,12 +17,13 @@ std::tuple<panda::Vertices<Integer>, panda::Names, panda::Maps, panda::Inequalit
 }
 
 template <typename Integer>
-std::tuple<panda::Inequalities<Integer>, panda::Names, panda::Maps, panda::Vertices<Integer>> panda::input::inequalities(int argc, char** argv)
+std::tuple<panda::Inequalities<Integer>, panda::Names, panda::Maps, panda::Vertices<Integer>, panda::Deterministics<Integer>> panda::input::inequalities(int argc, char** argv)
 {
    const auto data = inequalities<int>(argc, argv);
    return std::make_tuple(cast<Integer>(std::get<0>(data)),  // inequalities
                           std::get<1>(data),                 // names
                           std::get<2>(data),                 // maps
-                          cast<Integer>(std::get<3>(data))); // vertices
+                          cast<Integer>(std::get<3>(data)),  // vertices
+                          cast<Integer>(std::get<4>(data))); // deterministics
 }
 

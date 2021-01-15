@@ -81,6 +81,41 @@ void panda::implementation::adjacencyDecomposition(int argc, char** argv, const 
    future.wait();
 }
 
+template <template <typename, typename> class JobManagerType, typename Integer, typename TagType>
+void panda::implementation::adjacencyDecompositionDeterministic(int argc, char** argv, const std::tuple<Matrix<Integer>, Names, Maps, Matrix<Integer>, Matrix<Integer>>& data, TagType tag)
+{
+   const auto node_count = mpi::getSession().getNumberOfNodes();
+   const auto thread_count = concurrency::numberOfThreads(argc, argv);
+   const auto& input = std::get<0>(data);
+   const auto& names = std::get<1>(data);
+   const auto& known_output = std::get<3>(data);
+   const auto& deterministics = std::get<4>(data);
+//   JobManagerType<Integer, TagType> job_manager(names, node_count, thread_count);
+//   // TODO: Here we also need to process the Deterministics
+//   const auto reduced_data = reduce(job_manager, data);
+//   const auto& equations = std::get<0>(reduced_data);
+//   const auto& maps = std::get<1>(reduced_data);
+//   std::list<JoiningThread> threads;
+//   auto future = initializePool(job_manager, input, maps, known_output, equations);
+//   for ( int i = 0; i < thread_count; ++i )
+//   {
+//      threads.emplace_front([&]()
+//                            {
+//                               while ( true )
+//                               {
+//                                  const auto job = job_manager.get();
+//                                  if ( job.empty() )
+//                                  {
+//                                     break;
+//                                  }
+//                                  const auto jobs = algorithm::rotation(input, job, maps, tag);
+//                                  job_manager.put(jobs);
+//                               }
+//                            });
+//   }
+//   future.wait();
+}
+
 namespace
 {
    template <typename Integer, typename Callable>
