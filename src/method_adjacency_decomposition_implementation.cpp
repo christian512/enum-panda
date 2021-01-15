@@ -99,29 +99,31 @@ void panda::implementation::adjacencyDecompositionDeterministic(int argc, char**
    const auto& known_output = std::get<3>(data);
    const auto& deterministics = std::get<4>(data);
    JobManagerType<Integer, TagType> job_manager(names, node_count, thread_count);
-   // TODO: Here we also need to process the Deterministics
+   // reduce with accordance to deterministic parts
    const auto reduced_data = reduceDeterministic(job_manager, data);
-//   const auto& equations = std::get<0>(reduced_data);
-//   const auto& maps = std::get<1>(reduced_data);
-//   std::list<JoiningThread> threads;
-//   auto future = initializePool(job_manager, input, maps, known_output, equations);
-//   for ( int i = 0; i < thread_count; ++i )
-//   {
-//      threads.emplace_front([&]()
-//                            {
-//                               while ( true )
-//                               {
-//                                  const auto job = job_manager.get();
-//                                  if ( job.empty() )
-//                                  {
-//                                     break;
-//                                  }
-//                                  const auto jobs = algorithm::rotation(input, job, maps, tag);
-//                                  job_manager.put(jobs);
-//                               }
-//                            });
-//   }
-//   future.wait();
+   const auto& equations = std::get<0>(reduced_data);
+   const auto& maps = std::get<1>(reduced_data);
+   std::list<JoiningThread> threads;
+   // TODO: This initialization also needs to be run with the deterministic points -> otherwise we might get too many
+   auto future = initializePool(job_manager, input, maps, known_output, equations);
+   for ( int i = 0; i < thread_count; ++i )
+   {
+      threads.emplace_front([&]()
+                            {
+                               while ( true )
+                               {
+                                  const auto job = job_manager.get();
+                                  if ( job.empty() )
+                                  {
+                                     break;
+                                  }
+                                  // TODO: Here we have to pass the deterministics and generate a new algorithm rotationDeterministics
+                                  const auto jobs = algorithm::rotation(input, job, maps, tag);
+                                  job_manager.put(jobs);
+                               }
+                            });
+   }
+   future.wait();
 }
 
 namespace
