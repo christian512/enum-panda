@@ -153,6 +153,7 @@ namespace
          }
          // append the det-behavior to the full list
          deterministics.insert(deterministics.end(), det);
+         // TODO: Do we have to get the next line here again? -> Doesn't seem like it
       }
       return deterministics;
    }
@@ -229,8 +230,6 @@ std::tuple<Vertices<int>, Names, Maps, Inequalities<int>> panda::input::vertices
 template <>
 std::tuple<Inequalities<int>, Names, Maps, Vertices<int>, Deterministics<int>> panda::input::inequalities<int>(int argc, char** argv)
 {
-   // TODO: In this function I have to implement the reading of deterministic points
-   std::cerr << 'Reading file with inequalities \n';
    const auto filename = getFilename(argc, argv);
    std::ifstream file(filename.c_str());
    if ( !file )
@@ -276,8 +275,7 @@ std::tuple<Inequalities<int>, Names, Maps, Vertices<int>, Deterministics<int>> p
       }
       else if ( implementation::isKeywordDeterministics(token) )
       {
-         std::cerr << 'Reading deterministic behaviors';
-         // TODO: write a function: readDeterministics
+         deterministics = readDeterministics(file);
       }
       else
       {
