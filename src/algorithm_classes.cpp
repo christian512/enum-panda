@@ -113,17 +113,16 @@ Matrix<Integer> panda::algorithm::classes(std::set<Row<Integer>> rows, const Map
 template <typename Integer, typename TagType>
 Matrix<Integer> panda::algorithm::classesDeterministic(std::set<Row<Integer>> rows, const Maps& maps, Matrix<Integer> dets, TagType tag)
 {
+   std::cerr << "running deterministic version of classes algorithm";
    Matrix<Integer> classes;
    // shift the rows
    auto rows_shifted = affineTransformation(rows);
-   std::cerr << "shifted the row";
    // while the rows are not empty
    while ( !rows.empty() )
    {
       const auto row_class = getClass(*rows.begin(), maps, tag);
       // get the shifted version of the row classes
       const auto row_shifted_class = affineTransformation(row_class);
-      std::cerr << "shifted the class rows";
       assert( !row_class.empty() );
       assert( !row_shifted_class.empty() );
       assert ( row_shifted_class.size() == row_class.size() );
