@@ -68,8 +68,8 @@ Matrix<Integer> panda::algorithm::rotationDeterministic(const Matrix<Integer>& m
       const auto new_row = rotate(matrix, furthest_vertex, input, ridge);
       output.insert(new_row);
    }
-   // TODO: Here we have to calculate classes including the deterministics
-   return classes(output, maps, tag);
+   // Calculate the classes using deterministic points
+   return classesDeterministic(output, maps, deterministics, tag);
 }
 
 namespace

@@ -29,10 +29,18 @@ namespace panda
       /// Precondition: if input are facets, then these facets must be normalized.
       template <typename Integer, typename TagType>
       Matrix<Integer> classes(Matrix<Integer>, const Maps&, TagType);
+      /// Reduces a list of rows to just the representative using deterministic points.
+      /// Precondition: deterministics must be given
+      template <typename Integer, typename TagType>
+      Matrix<Integer> classesDeterministic(Matrix<Integer>, const Maps&, Matrix<Integer>, TagType);
       /// Reduces a list of rows to just the representatives.
       /// Precondition: if input are facets, then these facets must be normalized.
       template <typename Integer, typename TagType>
       Matrix<Integer> classes(std::set<Row<Integer>>, const Maps&, TagType);
+      /// Reduces a list of rows to just the representative using deterministic points.
+      /// Precondition: deterministics must be given
+      template <typename Integer, typename TagType>
+      Matrix<Integer> classesDeterministic(std::set<Row<Integer>>, const Maps&, Matrix<Integer>, TagType);
       /// Transforms a list of rows under affine transformation
       /// Precondition: None?
       template <typename Integer>

@@ -66,7 +66,52 @@ Matrix<Integer> panda::algorithm::classes(Matrix<Integer> input, const Maps& map
 }
 
 template <typename Integer, typename TagType>
+Matrix<Integer> panda::algorithm::classesDeterministic(Matrix<Integer> input, const Maps& maps, Matrix<Integer> dets, TagType tag)
+{
+   std::set<Row<Integer>> rows(input.cbegin(), input.cend());
+   return classesDeterministic(rows, maps, dets, tag);
+}
+
+template <typename Integer, typename TagType>
 Matrix<Integer> panda::algorithm::classes(std::set<Row<Integer>> rows, const Maps& maps, TagType tag)
+{
+   Matrix<Integer> classes;
+   // shift the rows
+   auto rows_shifted = affineTransformation(rows);
+   std::cerr << "shifted the row";
+   // while the rows are not empty
+   while ( !rows.empty() )
+   {
+      const auto row_class = getClass(*rows.begin(), maps, tag);
+      // get the shifted version of the row classes
+      const auto row_shifted_class = affineTransformation(row_class);
+      std::cerr << "shifted the class rows";
+      assert( !row_class.empty() );
+      assert( !row_shifted_class.empty() );
+      assert ( row_shifted_class.size() == row_class.size() );
+      classes.push_back(*row_class.crbegin()); // Important detail: last element is chosen as the representative
+      // Iterate over the class rows (and shifted ones just by index)
+      for ( auto row_shifted : row_shifted_class )
+      {
+         // check the equivalence between of the shifted row, with the others
+         int position = checkEquivalence(rows_shifted, row_shifted);
+         if ( position != -1)
+         {
+            // remove the entries from rows and rows shifted
+            auto its = rows_shifted.begin();
+            std::advance(its, position);
+            rows_shifted.erase(its);
+            auto it = rows.begin();
+            std::advance(it, position);
+            rows.erase(it);
+         }
+      }
+   }
+   return classes;
+}
+
+template <typename Integer, typename TagType>
+Matrix<Integer> panda::algorithm::classesDeterministic(std::set<Row<Integer>> rows, const Maps& maps, Matrix<Integer> dets, TagType tag)
 {
    Matrix<Integer> classes;
    // shift the rows
