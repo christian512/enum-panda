@@ -110,28 +110,29 @@ Matrix<Integer> panda::algorithm::classesDeterministic(std::set<Row<Integer>> ro
    while ( !rows.empty() )
    {
       std::cerr << "rows.size(): " << rows.size() << "\n";
+      std::cerr << "class_repr.size(): " << classes_repr.size() << "\n";
       // Get the class of the first row
       const auto rows_class = getClass(*rows.begin(), maps, tag);
       assert ( !rows_class.empty() );
-      assert ( panda::algorithm::checkEquivalence(*rows_class.begin(), *rows.begin(), dets));
+      assert ( panda::algorithm::checkEquivalence(*rows_class.crbegin(), *rows.begin(), dets));
       // add the representative of the class to the return matrix
       classes_repr.push_back(*rows_class.crbegin());
       // iterate over the rows of that class
       for ( auto row_class : rows_class )
       {
-         // generate a copy of rows (needed to run proper for-loop)
-         std::set<Row<Integer>> copy_rows (rows);
-         // check if any row in rows is equivalent to rows_class
-         for ( const auto& row : copy_rows)
+         // beginning pointer
+         auto pos = rows.begin();
+         while( pos != rows.end())
          {
-            // Test if both rows are equivalent
-            if ( panda::algorithm::checkEquivalence(row_class, row, dets) )
-            {
-               // if equiv -> delete that row
-               const auto position = rows.find(row);
-               rows.erase(position);
-            }
 
+            // Test if both rows are equivalent
+            auto pos_next = std::next(pos);
+            if ( panda::algorithm::checkEquivalence(row_class, *pos, dets) )
+            {
+               std::cerr << "Deleting \n";
+               rows.erase(*pos);
+            }
+            pos = pos_next;
          }
       }
    }
@@ -175,18 +176,38 @@ bool panda::algorithm::checkEquivalence(const Row<Integer>& row_one, const Row<I
    std::vector<double> d_one(v_one.begin(), v_one.end());
    std::vector<double> d_two(v_two.begin(), v_two.end());
    // find the two lowest values in each vector
-   double low_v_one[2];
-   double low_v_two[2];
-   std::partial_sort_copy(d_one.begin(), d_one.end(), low_v_one, low_v_one + 2);
-   std::partial_sort_copy(d_two.begin(), d_two.end(), low_v_two, low_v_two + 2);
+   double low_v_one[d_one.size()];
+   double low_v_two[d_two.size()];
+   std::partial_sort_copy(d_one.begin(), d_one.end(), low_v_one, low_v_one + d_one.size());
+   std::partial_sort_copy(d_two.begin(), d_two.end(), low_v_two, low_v_two + d_two.size());
+   double f_one = low_v_one[0];
+   double f_two = low_v_two[0];
+   double g_one = f_one;
+   double g_two = f_two;
+   int i = 0;
+   while ( f_one == g_one && i < d_one.size())
+   {
+      g_one = low_v_one[i];
+      i++;
+   }
+   i = 0;
+   while ( f_two == g_two && i < d_two.size())
+   {
+      g_two = low_v_two[i];
+      i++;
+   }
+   g_one = g_one + f_one;
+   g_two = g_two + f_two;
+
    // rescale the two vectors
    for ( int i = 0; i < d_one.size(); i++)
    {
-      d_one[i] = ( d_one[i] - low_v_one[0] ) / low_v_one[1];
-      d_two[i] = ( d_two[i] - low_v_two[0] ) / low_v_two[1];
+      d_one[i] = ( d_one[i] - f_one ) / g_one;
+      d_two[i] = ( d_two[i] - f_two ) / g_two;
       // round the values
       d_one[i] = round(d_one[i] * 1000) / 1000;
       d_two[i] = round(d_two[i] * 1000) / 1000;
+      // std::cerr << "d_one[i]: " << d_one[i] << "   d_two[i]: " << d_two[i] << "\n";
    }
    // check if the two vectors are equal
    return d_one == d_two;
