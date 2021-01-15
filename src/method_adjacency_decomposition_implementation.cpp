@@ -32,10 +32,19 @@ namespace
    std::pair<Equations<Integer>, Maps> reduce(const JobManager<Integer, tag::facet>&, const std::tuple<Matrix<Integer>, Names, Maps, Matrix<Integer>>& data);
 
    template <typename Integer>
+   std::pair<Equations<Integer>, Maps> reduceDeterministic(const JobManager<Integer, tag::facet>&, const std::tuple<Matrix<Integer>, Names, Maps, Matrix<Integer>, Matrix<Integer>>& data);
+
+   template <typename Integer>
    std::pair<Equations<Integer>, Maps> reduce(const JobManagerProxy<Integer, tag::facet>&, const std::tuple<Matrix<Integer>, Names, Maps, Matrix<Integer>>& data);
+
+   template <typename Integer>
+   std::pair<Equations<Integer>, Maps> reduceDeterministic(const JobManagerProxy<Integer, tag::facet>&, const std::tuple<Matrix<Integer>, Names, Maps, Matrix<Integer>, Matrix<Integer>>& data);
 
    template <typename Integer, template <typename, typename> class JobManagerType>
    std::pair<Equations<Integer>, Maps> reduce(const JobManagerType<Integer, tag::vertex>&, const std::tuple<Matrix<Integer>, Names, Maps, Matrix<Integer>>& data);
+
+   template <typename Integer, template <typename, typename> class JobManagerType>
+   std::pair<Equations<Integer>, Maps> reduceDeterministic(const JobManagerType<Integer, tag::vertex>&, const std::tuple<Matrix<Integer>, Names, Maps, Matrix<Integer>, Matrix<Integer>>& data);
 
    template <typename Integer>
    std::future<void> initializePool(JobManager<Integer, tag::facet>&, const Matrix<Integer>&, const Maps&, const Matrix<Integer>&, const Equations<Integer>&);
@@ -56,7 +65,6 @@ void panda::implementation::adjacencyDecomposition(int argc, char** argv, const 
    const auto& names = std::get<1>(data);
    const auto& known_output = std::get<3>(data);
    JobManagerType<Integer, TagType> job_manager(names, node_count, thread_count);
-   // TODO: Here we also need to process the Deterministics
    const auto reduced_data = reduce(job_manager, data);
    const auto& equations = std::get<0>(reduced_data);
    const auto& maps = std::get<1>(reduced_data);
@@ -90,9 +98,9 @@ void panda::implementation::adjacencyDecompositionDeterministic(int argc, char**
    const auto& names = std::get<1>(data);
    const auto& known_output = std::get<3>(data);
    const auto& deterministics = std::get<4>(data);
-//   JobManagerType<Integer, TagType> job_manager(names, node_count, thread_count);
-//   // TODO: Here we also need to process the Deterministics
-//   const auto reduced_data = reduce(job_manager, data);
+   JobManagerType<Integer, TagType> job_manager(names, node_count, thread_count);
+   // TODO: Here we also need to process the Deterministics
+   const auto reduced_data = reduceDeterministic(job_manager, data);
 //   const auto& equations = std::get<0>(reduced_data);
 //   const auto& maps = std::get<1>(reduced_data);
 //   std::list<JoiningThread> threads;
@@ -134,10 +142,37 @@ namespace
       return std::make_pair(equations, original_maps);
    }
 
+   template <typename Integer, typename Callable>
+   std::pair<Equations<Integer>, Maps> reduceDeterministic(const std::tuple<Matrix<Integer>, Names, Maps, Matrix<Integer>, Matrix<Integer>>& data, Callable&& callable)
+   {
+      const auto& vertices = std::get<0>(data);
+      const auto& names = std::get<1>(data);
+      const auto& original_maps = std::get<2>(data);
+      const auto equations = algorithm::extractEquations(vertices);
+      if ( !equations.empty() )
+      {
+         callable(equations, names);
+         const auto maps = algorithm::normalize(original_maps, equations);
+         return std::make_pair(equations, maps);
+      }
+      return std::make_pair(equations, original_maps);
+   }
+
    template <typename Integer>
    std::pair<Equations<Integer>, Maps> reduce(const JobManager<Integer, tag::facet>&, const std::tuple<Matrix<Integer>, Names, Maps, Matrix<Integer>>& data)
    {
       return reduce(data, [](const Matrix<Integer>& equations, const Names& names)
+      {
+         std::cout << "Equations:\n";
+         algorithm::prettyPrint(std::cout, equations, names, "=");
+         std::cout << '\n';
+      });
+   }
+
+   template <typename Integer>
+   std::pair<Equations<Integer>, Maps> reduceDeterministic(const JobManager<Integer, tag::facet>&, const std::tuple<Matrix<Integer>, Names, Maps, Matrix<Integer>, Matrix<Integer>>& data)
+   {
+      return reduceDeterministic(data, [](const Matrix<Integer>& equations, const Names& names)
       {
          std::cout << "Equations:\n";
          algorithm::prettyPrint(std::cout, equations, names, "=");
@@ -151,8 +186,21 @@ namespace
       return reduce(data, [](const Matrix<Integer>&, const Names&) {});
    }
 
+   template <typename Integer>
+   std::pair<Equations<Integer>, Maps> reduceDeterministic(const JobManagerProxy<Integer, tag::facet>&, const std::tuple<Matrix<Integer>, Names, Maps, Matrix<Integer>, Matrix<Integer>>& data)
+   {
+      return reduceDeterministic(data, [](const Matrix<Integer>&, const Names&) {});
+   }
+
    template <typename Integer, template <typename, typename> class JobManagerType>
    std::pair<Equations<Integer>, Maps> reduce(const JobManagerType<Integer, tag::vertex>&, const std::tuple<Matrix<Integer>, Names, Maps, Matrix<Integer>>& data)
+   {
+      const auto& original_maps = std::get<2>(data);
+      return std::make_pair(Equations<Integer>{}, original_maps);
+   }
+
+   template <typename Integer, template <typename, typename> class JobManagerType>
+   std::pair<Equations<Integer>, Maps> reduceDeterministic(const JobManagerType<Integer, tag::vertex>&, const std::tuple<Matrix<Integer>, Names, Maps, Matrix<Integer>, Matrix<Integer>>& data)
    {
       const auto& original_maps = std::get<2>(data);
       return std::make_pair(Equations<Integer>{}, original_maps);
