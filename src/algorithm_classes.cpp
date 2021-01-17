@@ -120,11 +120,6 @@ Matrix<Integer> panda::algorithm::classesDeterministic(std::set<Row<Integer>> ro
       // iterate over the rows of that class
       for ( auto row_class : rows_class )
       {
-         // check that this row_class is equivalent -> checks if the checkEquivalence works correctly
-         if ( panda::algorithm::checkEquivalence(row_class, *rows.begin(), dets))
-         {
-            std::cerr << "problem in checkEquivalence-function \n";
-         }
          // beginning pointer
          std::cerr << "rows.size(): " << rows.size() << "\n";
          auto pos = rows.begin();
@@ -220,7 +215,7 @@ bool panda::algorithm::checkEquivalence(const Row<Integer>& row_one, const Row<I
       // std::cerr << "d_one[i]: " << d_one[i] << "   d_two[i]: " << d_two[i] << "\n";
    }
    // check if the two vectors are equal
-   if(!(d_one == d_two))
+/*   if(!(d_one == d_two))
    {
       std::cerr << "d1: ";
       for(int i=0; i<d_one.size(); i++)
@@ -229,6 +224,6 @@ bool panda::algorithm::checkEquivalence(const Row<Integer>& row_one, const Row<I
       for(int i=0; i<d_two.size(); i++)
          std::cerr << d_two[i] << ' ';
       std::cerr << "\n";
-   }
+   }*/
    return d_one == d_two;
 }
