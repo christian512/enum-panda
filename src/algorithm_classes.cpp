@@ -107,34 +107,21 @@ Matrix<Integer> panda::algorithm::classesDeterministic(std::set<Row<Integer>> ro
 
    // class representatives to return
    Matrix<Integer> classes_repr;
-   while ( !rows.empty() )
+   classes_repr.push_back(*rows.begin());
+   for ( auto row : rows)
    {
-      // std::cerr << "rows.size(): " << rows.size() << "\n";
-      std::cerr << "class_repr.size(): " << classes_repr.size() << "\n";
-      // Get the class of the first row
-      const auto rows_class = getClass(*rows.begin(), maps, tag);
-      assert ( !rows_class.empty() );
-      assert ( panda::algorithm::checkEquivalence(*rows_class.crbegin(), *rows.begin(), dets));
-      // add the representative of the class to the return matrix
-      classes_repr.push_back(*rows_class.crbegin());
-      // iterate over the rows of that class
-      for ( auto row_class : rows_class )
+      bool isEquiv = false;
+      //std::cerr << "classes_repr.size(): " << classes_repr.size() << "\n";
+      for ( auto crow: classes_repr)
       {
-         // beginning pointer
-         std::cerr << "rows.size(): " << rows.size() << "\n";
-         auto pos = rows.begin();
-         while( pos != rows.end())
+         if( panda::algorithm::checkEquivalenceMaps(crow, row, dets, maps, tag))
          {
-            // next position
-            auto pos_next = std::next(pos);
-            // Test if both rows are equivalent
-            if ( panda::algorithm::checkEquivalence(row_class, *pos, dets) )
-            {
-               std::cerr << "Equivalent rows found! \n";
-               rows.erase(*pos);
-            }
-            pos = pos_next;
+            isEquiv = true;
          }
+      }
+      if (!isEquiv)
+      {
+         classes_repr.push_back(row);
       }
    }
    return classes_repr;
@@ -166,10 +153,9 @@ std::set<std::vector<double>> panda::algorithm::affineTransformation(const std::
 }
 
 template <typename  Integer>
-bool panda::algorithm::checkEquivalence(const Row<Integer>& row_one, const Row<Integer>& row_two, const Deterministics<Integer>& dets)
-{
-   assert ( row_one.size() == row_two.size() );
-   assert ( *dets.begin().size() == row_one.size());
+bool panda::algorithm::checkEquivalence(const Row<Integer>& row_one, const Row<Integer>& row_two, const Deterministics<Integer>& dets) {
+   assert (row_one.size() == row_two.size());
+   assert (*dets.begin().size() == row_one.size());
    // multiply the vectors by the deterministics
    Row<Integer> v_one = dets * row_one;
    Row<Integer> v_two = dets * row_two;
@@ -190,14 +176,12 @@ bool panda::algorithm::checkEquivalence(const Row<Integer>& row_one, const Row<I
    double g_one = f_one;
    double g_two = f_two;
    int i = 0;
-   while ( f_one == g_one && i < d_one.size())
-   {
+   while (f_one == g_one && i < d_one.size()) {
       g_one = low_v_one[i];
       i++;
    }
    i = 0;
-   while ( f_two == g_two && i < d_two.size())
-   {
+   while (f_two == g_two && i < d_two.size()) {
       g_two = low_v_two[i];
       i++;
    }
@@ -205,10 +189,9 @@ bool panda::algorithm::checkEquivalence(const Row<Integer>& row_one, const Row<I
    g_two = g_two - f_two;
 
    // rescale the two vectors
-   for ( int i = 0; i < d_one.size(); i++)
-   {
-      d_one[i] = ( d_one[i] - f_one ) / g_one;
-      d_two[i] = ( d_two[i] - f_two ) / g_two;
+   for (int i = 0; i < d_one.size(); i++) {
+      d_one[i] = (d_one[i] - f_one) / g_one;
+      d_two[i] = (d_two[i] - f_two) / g_two;
       // round the values
       d_one[i] = round(d_one[i] * 1000) / 1000;
       d_two[i] = round(d_two[i] * 1000) / 1000;
@@ -226,4 +209,24 @@ bool panda::algorithm::checkEquivalence(const Row<Integer>& row_one, const Row<I
       std::cerr << "\n";
    }*/
    return d_one == d_two;
+}
+
+template <typename  Integer, typename TagType>
+bool panda::algorithm::checkEquivalenceMaps(const Row<Integer>& row_one, const Row<Integer>& row_two, const Deterministics<Integer>& dets, const Maps& maps, TagType tag)
+{
+   if( panda::algorithm::checkEquivalence(row_one, row_two, dets))
+   {
+      return true;
+   }
+
+   for( const auto map : maps)
+   {
+      // apply map on row two
+      auto new_row = panda::algorithm::apply(map, row_two, tag);
+      if( panda::algorithm::checkEquivalence(row_one, new_row, dets))
+      {
+         return true;
+      }
+   }
+   return false;
 }

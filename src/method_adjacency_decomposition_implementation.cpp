@@ -108,19 +108,46 @@ void panda::implementation::adjacencyDecompositionDeterministic(int argc, char**
    auto future = initializePool(job_manager, input, maps, known_output, equations);
    for ( int i = 0; i < thread_count; ++i )
    {
+      Matrix<Integer> all_classes;
       threads.emplace_front([&]()
                             {
+
                                while ( true )
                                {
                                   const auto job = job_manager.get();
+                                  all_classes.push_back(job);
                                   if ( job.empty() )
                                   {
                                      break;
                                   }
                                   // rotate using the deterministic function
-                                  const auto jobs = algorithm::rotationDeterministic(input, job, maps, deterministics, tag);
+                                  const auto jobs = algorithm::rotationDeterministic(input, job, maps,deterministics, tag);
                                   std::cerr << "Finished running rotationDeterministic \n";
-                                  job_manager.put(jobs);
+                                  Matrix<Integer> new_jobs;
+                                  for ( auto job_curr : jobs)
+                                  {
+                                     bool isEquiv = false;
+                                     for ( auto bell : all_classes)
+                                     {
+                                        if ( panda::algorithm::checkEquivalenceMaps(job_curr, bell, deterministics, maps, tag))
+                                        {
+                                           isEquiv = true;
+                                        }
+                                     }
+                                     if (!isEquiv)
+                                     {
+                                        new_jobs.push_back(job_curr);
+                                        all_classes.push_back(job_curr);
+                                        std::cerr << "new job: ";
+                                        for(int i=0; i<job_curr.size(); i++)
+                                           std::cerr << job_curr[i] << ' ';
+                                        std::cerr << "\n";
+                                     }
+
+                                  }
+                                  // TODO: Try to check equivalence of all jobs so far here
+                                  std::cerr << "number of new jobs: " << new_jobs.size() << "\n";
+                                  job_manager.put(new_jobs);
                                }
                             });
    }
@@ -230,6 +257,7 @@ namespace
          auto facets = algorithm::fourierMotzkinEliminationHeuristic(matrix);
          for ( auto& facet : facets )
          {
+            // TODO: this thing applies empty tag type?
             facet = algorithm::classRepresentative(facet, maps, TagType{});
          }
          manager.put(facets);
