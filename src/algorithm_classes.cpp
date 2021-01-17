@@ -102,14 +102,14 @@ Matrix<Integer> panda::algorithm::classesDeterministic(std::set<Row<Integer>> ro
    {
       return classes(rows, maps, tag);
    }
-   std::cerr << "running deterministic version of classes algorithm \n";
-   std::cerr << "Number of deterministics: " << dets.size() << "\n";
+   // std::cerr << "running deterministic version of classes algorithm \n";
+   // std::cerr << "Number of deterministics: " << dets.size() << "\n";
 
    // class representatives to return
    Matrix<Integer> classes_repr;
    while ( !rows.empty() )
    {
-      std::cerr << "rows.size(): " << rows.size() << "\n";
+      // std::cerr << "rows.size(): " << rows.size() << "\n";
       std::cerr << "class_repr.size(): " << classes_repr.size() << "\n";
       // Get the class of the first row
       const auto rows_class = getClass(*rows.begin(), maps, tag);
@@ -120,16 +120,22 @@ Matrix<Integer> panda::algorithm::classesDeterministic(std::set<Row<Integer>> ro
       // iterate over the rows of that class
       for ( auto row_class : rows_class )
       {
+         // check that this row_class is equivalent -> checks if the checkEquivalence works correctly
+         if ( panda::algorithm::checkEquivalence(row_class, *rows.begin(), dets))
+         {
+            std::cerr << "problem in checkEquivalence-function \n";
+         }
          // beginning pointer
+         std::cerr << "rows.size(): " << rows.size() << "\n";
          auto pos = rows.begin();
          while( pos != rows.end())
          {
-
-            // Test if both rows are equivalent
+            // next position
             auto pos_next = std::next(pos);
+            // Test if both rows are equivalent
             if ( panda::algorithm::checkEquivalence(row_class, *pos, dets) )
             {
-               std::cerr << "Deleting \n";
+               std::cerr << "Equivalent rows found! \n";
                rows.erase(*pos);
             }
             pos = pos_next;
@@ -168,13 +174,17 @@ template <typename  Integer>
 bool panda::algorithm::checkEquivalence(const Row<Integer>& row_one, const Row<Integer>& row_two, const Deterministics<Integer>& dets)
 {
    assert ( row_one.size() == row_two.size() );
+   assert ( *dets.begin().size() == row_one.size());
    // multiply the vectors by the deterministics
    Row<Integer> v_one = dets * row_one;
    Row<Integer> v_two = dets * row_two;
-   //row_two = dets * row_two;
    // Generate double vectors from the integer input vectors
    std::vector<double> d_one(v_one.begin(), v_one.end());
    std::vector<double> d_two(v_two.begin(), v_two.end());
+//   std::cerr << "d2: ";
+//   for(int i=0; i<d_two.size(); i++)
+//      std::cerr << d_two[i] << ' ';
+//   std::cerr << "\n";
    // find the two lowest values in each vector
    double low_v_one[d_one.size()];
    double low_v_two[d_two.size()];
@@ -196,8 +206,8 @@ bool panda::algorithm::checkEquivalence(const Row<Integer>& row_one, const Row<I
       g_two = low_v_two[i];
       i++;
    }
-   g_one = g_one + f_one;
-   g_two = g_two + f_two;
+   g_one = g_one - f_one;
+   g_two = g_two - f_two;
 
    // rescale the two vectors
    for ( int i = 0; i < d_one.size(); i++)
@@ -210,5 +220,15 @@ bool panda::algorithm::checkEquivalence(const Row<Integer>& row_one, const Row<I
       // std::cerr << "d_one[i]: " << d_one[i] << "   d_two[i]: " << d_two[i] << "\n";
    }
    // check if the two vectors are equal
+   if(!(d_one == d_two))
+   {
+      std::cerr << "d1: ";
+      for(int i=0; i<d_one.size(); i++)
+         std::cerr << d_one[i] << ' ';
+      std::cerr << "\n d2: ";
+      for(int i=0; i<d_two.size(); i++)
+         std::cerr << d_two[i] << ' ';
+      std::cerr << "\n";
+   }
    return d_one == d_two;
 }
