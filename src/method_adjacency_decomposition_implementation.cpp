@@ -132,11 +132,8 @@ void panda::implementation::adjacencyDecompositionDeterministic(int argc, char**
                                      bool isEquiv = false;
                                      for ( auto bell : all_classes)
                                      {
-                                        // remove the 1 entry at the end
-                                        Row<Integer> row_one(job_curr.begin(), job_curr.end()-1);
-                                        Row<Integer> row_two(bell.begin(), bell.end()-1);
                                         // check the equivalence
-                                        if ( panda::algorithm::checkEquivalenceMaps(row_one, row_two, deterministics, maps, tag))
+                                        if ( panda::algorithm::checkEquivalenceMaps(job_curr, bell, deterministics, maps, tag))
                                         {
                                            isEquiv = true;
                                         }

@@ -212,8 +212,10 @@ bool panda::algorithm::checkEquivalence(const Row<Integer>& row_one, const Row<I
 }
 
 template <typename  Integer, typename TagType>
-bool panda::algorithm::checkEquivalenceMaps(const Row<Integer>& row_one, const Row<Integer>& row_two, const Deterministics<Integer>& dets, const Maps& maps, TagType tag)
+bool panda::algorithm::checkEquivalenceMaps(const Row<Integer>& row_one_ext, const Row<Integer>& row_two_ext, const Deterministics<Integer>& dets, const Maps& maps, TagType tag)
 {
+   Row<Integer> row_one(row_one_ext.begin(), row_one_ext.end());
+   Row<Integer> row_two(row_two_ext.begin(), row_two_ext.end());
    // multiply the vectors by the deterministics
    Row<Integer> v_one = dets * row_one;
    Row<Integer> v_two = dets * row_two;
@@ -267,11 +269,11 @@ bool panda::algorithm::checkEquivalenceMaps(const Row<Integer>& row_one, const R
    for( const auto map : maps)
    {
       // apply map on row two
-      auto new_row = panda::algorithm::apply(map, row_two, tag);
+      auto new_row = panda::algorithm::apply(map, row_two_ext, tag);
       // generate empty maps to call the same functions
       Maps empty_maps;
       // check if the new rows are equivalent
-      if( panda::algorithm::checkEquivalenceMaps(row_one, new_row, dets, empty_maps, tag))
+      if( panda::algorithm::checkEquivalenceMaps(row_one_ext, new_row, dets, empty_maps, tag))
       {
          return true;
       }
