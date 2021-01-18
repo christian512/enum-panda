@@ -26,8 +26,8 @@ namespace panda
       EXTERN template Matrix<Integer> classes(std::set<Row<Integer>>, const Maps&, tag::vertex);
       EXTERN template Matrix<Integer> classesDeterministic(Matrix<Integer>, const Maps&, Matrix<Integer>, tag::facet);
       EXTERN template Matrix<Integer> classesDeterministic(Matrix<Integer>, const Maps&, Matrix<Integer>, tag::vertex);
-      EXTERN template Matrix<Integer> classesDeterministic(Matrix<Integer>, const Maps&, Matrix<Integer>, tag::facet);
-      EXTERN template Matrix<Integer> classesDeterministic(Matrix<Integer>, const Maps&, Matrix<Integer>, tag::vertex);
+      EXTERN template Matrix<Integer> classesDeterministic(std::set<Row<Integer>>, const Maps&, Matrix<Integer>, tag::facet);
+      EXTERN template Matrix<Integer> classesDeterministic(std::set<Row<Integer>>, const Maps&, Matrix<Integer>, tag::vertex);
       EXTERN template std::set<std::vector<double>> affineTransformation(const std::set<Row<Integer>>& input);
       EXTERN template bool checkEquivalence(const Row<Integer>&, const Row<Integer>&, const Deterministics<Integer>&);
       EXTERN template bool checkEquivalenceMaps(const Row<Integer>&, const Row<Integer>&, const Deterministics<Integer>&, const Maps&, tag::facet);
