@@ -15,6 +15,7 @@
 #include <tuple>
 #include <vector>
 #include <iostream>
+#include <cmath>
 
 #include "algorithm_map_operations.h"
 #include "algorithm_row_operations.h"
