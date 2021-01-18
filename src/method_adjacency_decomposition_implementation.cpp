@@ -108,28 +108,35 @@ void panda::implementation::adjacencyDecompositionDeterministic(int argc, char**
    auto future = initializePool(job_manager, input, maps, known_output, equations);
    for ( int i = 0; i < thread_count; ++i )
    {
-      Matrix<Integer> all_classes;
+
       threads.emplace_front([&]()
                             {
-
+                               Matrix<Integer> all_classes;
                                while ( true )
                                {
                                   const auto job = job_manager.get();
-                                  all_classes.push_back(job);
                                   if ( job.empty() )
                                   {
                                      break;
                                   }
+                                  // add job to all classes
+                                  all_classes.push_back(job);
                                   // rotate using the deterministic function
                                   const auto jobs = algorithm::rotationDeterministic(input, job, maps,deterministics, tag);
-                                  std::cerr << "Finished running rotationDeterministic \n";
+                                  //const auto jobs = algorithm::rotation(input, job, maps, tag);
+                                  // std::cerr << "Finished running rotationDeterministic \n";
+                                  // check for equivalence in the new jobs
                                   Matrix<Integer> new_jobs;
                                   for ( auto job_curr : jobs)
                                   {
                                      bool isEquiv = false;
                                      for ( auto bell : all_classes)
                                      {
-                                        if ( panda::algorithm::checkEquivalenceMaps(job_curr, bell, deterministics, maps, tag))
+                                        // remove the 1 entry at the end
+                                        Row<Integer> row_one(job_curr.begin(), job_curr.end()-1);
+                                        Row<Integer> row_two(bell.begin(), bell.end()-1);
+                                        // check the equivalence
+                                        if ( panda::algorithm::checkEquivalenceMaps(row_one, row_two, deterministics, maps, tag))
                                         {
                                            isEquiv = true;
                                         }
@@ -145,7 +152,6 @@ void panda::implementation::adjacencyDecompositionDeterministic(int argc, char**
                                      }
 
                                   }
-                                  // TODO: Try to check equivalence of all jobs so far here
                                   std::cerr << "number of new jobs: " << new_jobs.size() << "\n";
                                   job_manager.put(new_jobs);
                                }

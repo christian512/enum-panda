@@ -214,16 +214,64 @@ bool panda::algorithm::checkEquivalence(const Row<Integer>& row_one, const Row<I
 template <typename  Integer, typename TagType>
 bool panda::algorithm::checkEquivalenceMaps(const Row<Integer>& row_one, const Row<Integer>& row_two, const Deterministics<Integer>& dets, const Maps& maps, TagType tag)
 {
-   if( panda::algorithm::checkEquivalence(row_one, row_two, dets))
+   // multiply the vectors by the deterministics
+   Row<Integer> v_one = dets * row_one;
+   Row<Integer> v_two = dets * row_two;
+   // Generate double vectors from the integer input vectors
+   std::vector<double> d_one(v_one.begin(), v_one.end());
+   std::vector<double> d_two(v_two.begin(), v_two.end());
+   // find the two lowest values in each vector
+   std::vector<double> sorted_one(d_one.size());
+   std::vector<double> sorted_two(d_two.size());
+   std::partial_sort_copy(d_one.begin(), d_one.end(), sorted_one.begin(), sorted_one.end());
+   std::partial_sort_copy(d_two.begin(), d_two.end(), sorted_two.begin(), sorted_two.end());
+   double f_one = sorted_one[0];
+   double f_two = sorted_two[0];
+   double g_one = f_one;
+   double g_two = f_two;
+   int i = 0;
+   while (f_one == g_one && i < d_one.size()) {
+      g_one = sorted_one[i];
+      i++;
+   }
+   i = 0;
+   while (f_two == g_two && i < d_two.size()) {
+      g_two = sorted_two[i];
+      i++;
+   }
+   g_one = g_one - f_one;
+   g_two = g_two - f_two;
+
+   // rescale vectors (also sorted ones to compare)
+   for (int i = 0; i < d_one.size(); i++) {
+      d_one[i] = (d_one[i] - f_one) / g_one;
+      d_two[i] = (d_two[i] - f_two) / g_two;
+      // round the values
+      d_one[i] = round(d_one[i] * 1000) / 1000;
+      d_two[i] = round(d_two[i] * 1000) / 1000;
+   }
+   // check if the two vectors are the same
+   if ( d_one == d_two)
    {
       return true;
+   }
+
+   // perform tally check
+   std::partial_sort_copy(d_one.begin(), d_one.end(), sorted_one.begin(), sorted_one.end());
+   std::partial_sort_copy(d_two.begin(), d_two.end(), sorted_two.begin(), sorted_two.end());
+   if ( !(sorted_one == sorted_two))
+   {
+      return false;
    }
 
    for( const auto map : maps)
    {
       // apply map on row two
       auto new_row = panda::algorithm::apply(map, row_two, tag);
-      if( panda::algorithm::checkEquivalence(row_one, new_row, dets))
+      // generate empty maps to call the same functions
+      Maps empty_maps;
+      // check if the new rows are equivalent
+      if( panda::algorithm::checkEquivalenceMaps(row_one, new_row, dets, empty_maps, tag))
       {
          return true;
       }

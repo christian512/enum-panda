@@ -70,7 +70,9 @@ Matrix<Integer> panda::algorithm::rotationDeterministic(const Matrix<Integer>& m
    }
    // Calculate the classes using deterministic points
    // TODO: give the input here as well, so we can return none?
-   return classesDeterministic(output, maps, deterministics, tag);
+   Matrix<Integer> output_matrix(output.begin(), output.end());
+   return output_matrix;
+   //return classesDeterministic(output, maps, deterministics, tag);
 }
 
 namespace
