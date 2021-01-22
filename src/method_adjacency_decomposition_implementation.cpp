@@ -136,6 +136,7 @@ void panda::implementation::adjacencyDecompositionDeterministic(int argc, char**
                                         if ( panda::algorithm::checkEquivalenceMaps(job_curr, bell, deterministics, maps, tag))
                                         {
                                            isEquiv = true;
+                                           break;
                                         }
                                      }
                                      if (!isEquiv)

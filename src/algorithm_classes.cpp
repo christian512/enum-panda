@@ -215,14 +215,28 @@ bool panda::algorithm::checkEquivalence(const Row<Integer>& row_one, const Row<I
 template <typename  Integer, typename TagType>
 bool panda::algorithm::checkEquivalenceMaps(const Row<Integer>& row_one_ext, const Row<Integer>& row_two_ext, const Deterministics<Integer>& dets, const Maps& maps, TagType tag)
 {
-   Row<Integer> row_one(row_one_ext.begin(), row_one_ext.end());
-   Row<Integer> row_two(row_two_ext.begin(), row_two_ext.end());
+   // Copy row vectors and cut off factor ( we don't need to scale by the factor, as we will scale v independently)
+   Row<Integer> row_one;
+   Row<Integer> row_two;
+   for ( int i = 0; i < row_one_ext.size()-1; i++)
+   {
+      row_one.push_back(row_one_ext[i]);
+      row_two.push_back(row_two_ext[i]);
+   }
+
+
+   // std::cerr << "Num dets: " << dets.size() << "\n";
    // multiply the vectors by the deterministics
    Row<Integer> v_one = dets * row_one;
    Row<Integer> v_two = dets * row_two;
-   // Generate double vectors from the integer input vectors
-   std::vector<double> d_one(v_one.begin(), v_one.end());
-   std::vector<double> d_two(v_two.begin(), v_two.end());
+   // std::cerr << "Length v_one: " << v_one.size() << "\n";
+   // Generate double vectors from the v_vectors and the factor obtained before
+   std::vector<double> d_one;
+   std::vector<double> d_two;
+   for ( int i = 0; i < dets.size(); i++){
+      d_one.push_back(v_one[i] ); // we need to divide here by the factor
+      d_two.push_back(v_two[i] );
+   }
    // find the two lowest values in each vector
    std::vector<double> sorted_one(d_one.size());
    std::vector<double> sorted_two(d_two.size());
@@ -259,25 +273,33 @@ bool panda::algorithm::checkEquivalenceMaps(const Row<Integer>& row_one_ext, con
       return true;
    }
 
-   // perform tally check
-   std::partial_sort_copy(d_one.begin(), d_one.end(), sorted_one.begin(), sorted_one.end());
-   std::partial_sort_copy(d_two.begin(), d_two.end(), sorted_two.begin(), sorted_two.end());
-   if ( !(sorted_one == sorted_two))
+   // perform tally check if relabels are given
+   if (maps.size() > 0)
    {
-      return false;
+      std::partial_sort_copy(d_one.begin(), d_one.end(), sorted_one.begin(), sorted_one.end());
+      std::partial_sort_copy(d_two.begin(), d_two.end(), sorted_two.begin(), sorted_two.end());
+      if ( !(sorted_one == sorted_two))
+      {
+         return false;
+      }
    }
+
 
    for( const auto map : maps)
    {
       // apply map on row two
       auto new_row = panda::algorithm::apply(map, row_two_ext, tag);
-      // generate empty maps to call the same functions
-      Maps empty_maps;
-      // check if the new rows are equivalent
-      if( panda::algorithm::checkEquivalenceMaps(row_one_ext, new_row, dets, empty_maps, tag))
-      {
-         return true;
+      // Check if new row is different from row_two_ext -> if not, no rerun neededs
+      if ( !(new_row == row_two_ext)){
+         // generate empty maps to call the same functions
+         Maps empty_maps;
+         // check if the new rows are equivalent
+         if( panda::algorithm::checkEquivalenceMaps(row_one_ext, new_row, dets, empty_maps, tag))
+         {
+            return true;
+         }
       }
+
    }
    return false;
 }
