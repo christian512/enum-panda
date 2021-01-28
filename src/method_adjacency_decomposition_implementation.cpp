@@ -259,12 +259,15 @@ namespace
       else
       {
          auto facets = algorithm::fourierMotzkinEliminationHeuristic(matrix);
-         for ( auto& facet : facets )
-         {
-            // TODO: this thing applies empty tag type?
-            facet = algorithm::classRepresentative(facet, maps, TagType{});
-         }
-         manager.put(facets);
+         // only put one facet
+         manager.put(facets[0]);
+
+//         for ( auto& facet : facets )
+//         {
+//            // TODO: this thing applies empty tag type?
+//            facet = algorithm::classRepresentative(facet, maps, TagType{});
+//         }
+//         manager.put(facets);
       }
       // Add the remaining known facets from file asynchronously.
       auto future = std::async(std::launch::async, [&]()
