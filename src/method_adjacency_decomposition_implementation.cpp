@@ -104,7 +104,7 @@ void panda::implementation::adjacencyDecompositionDeterministic(int argc, char**
    const auto& equations = std::get<0>(reduced_data);
    const auto& maps = std::get<1>(reduced_data);
    std::list<JoiningThread> threads;
-   // TODO: This initialization also needs to be run with the deterministic points -> otherwise we might get too many
+   // initialization. Running with know output is recommended, otherwise we might find too many starting facets
    auto future = initializePool(job_manager, input, maps, known_output, equations);
    for ( int i = 0; i < thread_count; ++i )
    {
@@ -253,7 +253,7 @@ namespace
       if ( !known_output.empty() )
       {
          auto tmp = algorithm::normalize(known_output.front(), equations);
-         tmp = algorithm::classRepresentative(tmp, maps, TagType{});
+         // tmp = algorithm::classRepresentative(tmp, maps, TagType{});
          manager.put(Matrix<Integer>{tmp});
       }
       else

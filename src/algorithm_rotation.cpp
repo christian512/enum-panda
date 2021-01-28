@@ -10,12 +10,14 @@
 
 #include <algorithm>
 #include <cassert>
+#include <iostream>
 
 #include "algorithm_classes.h"
 #include "algorithm_fourier_motzkin_elimination.h"
 #include "algorithm_inequality_operations.h"
 #include "algorithm_integer_operations.h"
 #include "algorithm_row_operations.h"
+
 
 using namespace panda;
 
@@ -71,8 +73,8 @@ Matrix<Integer> panda::algorithm::rotationDeterministic(const Matrix<Integer>& m
    // Calculate the classes using deterministic points
    // TODO: give the input here as well, so we can return none?
    Matrix<Integer> output_matrix(output.begin(), output.end());
-   return output_matrix;
-   //return classesDeterministic(output, maps, deterministics, tag);
+   // return output_matrix;
+   return classesDeterministic(output, maps, deterministics, tag);
 }
 
 namespace
@@ -111,6 +113,15 @@ namespace
    {
       const auto vertices_on_facet = verticesWithZeroDistance(vertices, facet);
       assert( !vertices_on_facet.empty() );
+      std::cerr << "Vertices on facet \n";
+      for ( auto v : vertices_on_facet)
+      {
+         std::cerr << v << "\n";
+
+      }
+      std::cerr << "Stopping PANDA algorithm \n";
+      exit(0);
+      // TODO: Why do we need FourierMotzkinElimination here -> we need facets instead of vertices, so transform V to H representation
       return algorithm::fourierMotzkinElimination(vertices_on_facet);
    }
 
